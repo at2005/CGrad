@@ -37,15 +37,20 @@ class Tensor {
 
 		}
 
-		size_t get_total_el() {
-			return total_elements;
+		size_t get_size() {
+			return size;
+		}
+		
+		float& operator[](size_t i) {
+			return mem_block[i];
+
 		}
 
 	private:
 		float* mem_block;
 		uint64_t* shape;
 		size_t dim;
-		size_t total_elements;
+		size_t size;
 
 		// cumulative product function
 		size_t cumprod(uint64_t* arr, size_t len) {
@@ -63,22 +68,34 @@ Tensor add_tensor(Tensor a, Tensor b) {
 		c[i] = a[i] + b[i];	
 
 	}
-
+	
 	return c;
 
 }
 
 
-float dot_prod(Tensor1D a, Tensor1D b) {
-	float total = 0;
-	for(int i = 0; i < a.size(); i++) {
-		total += a[i] * b[i];
+float matmul(Tensor a, Tensor b) {
+	if(a.dim < 2 or b.dim < 2) {
+		cerr << "error\n";
+		exit(1);
 
-	}
+	}	
 	
-	return total;
-}
+	size_t a_num_rows = a.shape[a.dim - 2];
+	size_t a_num_cols = a.shape[a.dim - 1];
+	size_t b_num_rows = b.shape[b.dim - 2];
+	size_t b_num_cols = b.shape[b.dim - 1];
+	
+	for(int i = 0; i < a_num_rows; i++) {
+		for(int j = 0; j < b_col_sz; j++) {
+			float total = 0.0;
+			for(int k = 0; k < a_col_sz; i++) {
+				total += a[i*a_row_sz + k] * b[j + k*b_row_sz];
+			}
+		}
+	}
 
+}
 
 
 
