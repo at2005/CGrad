@@ -179,46 +179,6 @@ class Tensor {
 
 
 
-Tensor matmul(Tensor a, Tensor b) {
-	if(a.get_dim() < 2 or b.get_dim() < 2) {
-		cerr << "error\n";
-		exit(1);
-
-	}	
-	
-	size_t* a_shape = a.get_shape();
-	size_t* b_shape = b.get_shape();
-
-	size_t a_num_rows = a_shape[a.get_dim() - 2];
-	size_t a_num_cols = a_shape[a.get_dim() - 1];
-	size_t b_num_rows = b_shape[b.get_dim() - 2];
-	size_t b_num_cols = b_shape[b.get_dim() - 1];
-	
-	
-	size_t shape[2] = {a_num_rows, b_num_cols};
-	
-	Tensor c  = *(new Tensor(shape, a.get_dim()));
-	//cout << c.get_size();
-	
-//	cout << a_num_cols;
-
-	
-	for(int i = 0; i < a_num_rows; i++) {
-		for(int j = 0; j < b_num_cols; j++) {
-			float total = 0.0;
-			for(int k = 0; k < a_num_cols; k++) {
-				total += a[i*a_num_cols + k] * b[j + k*b_num_cols];
-			}
-
-			c[i*a_num_rows + j] = total;
-		}
-	}
-	
-
-	return c;
-
-}
-
 
 int main() {
 	
@@ -231,9 +191,10 @@ int main() {
 	for(int i = 0; i < 16; i++) {a[i] = (float)i; b[i] = (float)i;}
 
 	Tensor c = a ^ b;
-	//c.print_tensor();
 	c.dump();	
-	
+	c = c ^ a;		
+	c = c * -1.43;
+	c = c ^ b;
 	c = a + c;
 	c = c * -1.5;
 	c.dump();
