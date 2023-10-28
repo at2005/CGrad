@@ -59,6 +59,16 @@ Tensor Tensor::operator+(Tensor b) {
 
 }
 
+Tensor Tensor::operator-(Tensor b) {
+	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	for(int i = 0; i < this->get_size();i++) {
+		c[i] = this->mem_block[i] - b[i];
+
+	}
+
+	return c;
+
+}
 
 Tensor Tensor::operator*(float scalar) {
 	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
@@ -71,6 +81,21 @@ Tensor Tensor::operator*(float scalar) {
 
 }
 
+
+Tensor Tensor::operator*(Tensor b) {
+	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	
+	for(int i = 0; i < this->get_size();i++) {
+		c[i] = b.mem_block[i] * this->mem_block[i];
+
+	}
+
+	return c;
+
+
+}
+
+// matmul
 Tensor Tensor::operator^(Tensor b) {
 
 	if(this->get_dim() < 2 or b.get_dim() < 2) {
@@ -91,10 +116,6 @@ Tensor Tensor::operator^(Tensor b) {
 	size_t shape[2] = {a_num_rows, b_num_cols};
 
 	Tensor c  = *(new Tensor(shape, this->get_dim()));
-	//cout << c.get_size();
-
-//      cout << a_num_cols;
-
 
 	for(int i = 0; i < a_num_rows; i++) {
 		for(int j = 0; j < b_num_cols; j++) {
@@ -146,6 +167,16 @@ void Tensor::fill(float value) {
 
 }
 
+void Tensor::tsqrt() {
+	for(int i = 0; i < size; i++) mem_block[i] = sqrt(mem_block[i]);
+
+}
+
+void Tensor::texp() {
+	for(int i = 0; i < size; i++) mem_block[i] = exp(mem_block[i]);
+
+}
+
 
 
 
@@ -176,15 +207,20 @@ void Tensor::create_prod_arr(size_t* shape_arr, size_t arr_size, int* output_arr
 
 
 
+
 // testing
 
 int main() {
 	
 	size_t shape[2] = {4,4};
-
+	
 	Tensor a(shape, 2);		
 	Tensor b(shape, 2);
 
+	size_t test_shape[4] = {2,2,2,2};
+	Tensor test(test_shape, 4);
+	test.fill(2.5);
+	test.dump();
 
 	for(int i = 0; i < 16; i++) {a[i] = (float)i; b[i] = (float)i;}
 
@@ -197,6 +233,7 @@ int main() {
 	c = c * -1.5;
 	c.dump();
 	c.fill(2.0);
+	
 	c.dump();
 	return 0;
 

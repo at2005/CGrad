@@ -13,30 +13,37 @@ class Tensor {
 		~Tensor() ;
 		
 		float* get_mem();
+
 		size_t* get_shape();
 
 		size_t get_dim();
-
 
 		size_t get_size();
 		
 		float& operator[](size_t i);
 
-	
-		
 		Tensor operator+(Tensor b); 
 		
+		Tensor operator-(Tensor b);
 
 		Tensor operator*(float scalar);
+		
+		// element-wise hadamard product
+		Tensor operator*(Tensor b);
 
+		//Tensor operator/(float scalar);
+		
+		// matmul operation
 		Tensor operator^(Tensor b);
-
-
-		void dump() ;
-
-
+		
+		void dump();
+		
 		void fill(float value) ;
+	
+		void tsqrt();	
 
+		void texp();
+		
 
 	private:
 		float* mem_block;
