@@ -49,6 +49,8 @@ class Tensor {
 		void tsqrt();	
 
 		void texp();
+
+		void tanh();
 		
 
 	private:

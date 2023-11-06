@@ -37,6 +37,7 @@ MLP::~MLP() {
 Tensor MLP::forward(Tensor x) {
 	// should probably add context-storing functionality here
 	Tensor c = weight ^ x;
+	c.tanh();
 	return c;
 
 }
@@ -54,9 +55,7 @@ int main() {
 	MLP layer1(32, 64);
 	Tensor res = layer1.forward(input);	
 	res.dump();
-	
 	return 0;
-
 
 
 }

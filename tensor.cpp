@@ -119,8 +119,6 @@ Tensor Tensor::operator^(Tensor b) {
 
 
 	size_t shape[2] = {a_num_rows, b_num_cols};
-	
-	cout << shape[0] << shape[1] << endl;
 
 	Tensor c  = *(new Tensor(shape, this->get_dim()));
 
@@ -198,7 +196,14 @@ void Tensor::texp() {
 
 }
 
+float tanh_scalar(float z) {
+	return (exp(z) - exp(-z)) / (exp(z) + exp(-z)); 
 
+}
+
+void Tensor::tanh() {
+	for(int i = 0; i < size; i++) mem_block[i] = tanh_scalar(mem_block[i]);
+}
 
 
 // cumulative product function
