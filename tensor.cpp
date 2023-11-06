@@ -1,26 +1,31 @@
 
-#include "Tensor.h"
+#include "tensor.h"
 
 Tensor::Tensor(size_t* in_shape, size_t in_dim) {
-		// total number of elements given by a cumulative product of shape array over each dim
-		size_t total_el = cumprod(in_shape, in_dim);
-//                      cout << total_el << endl;
-
-		// contiguous block of memory reserved for tensor values
-		float* tensor_mem = (float*)malloc(sizeof(float) * total_el);
-
-		// allocate memory for dimension array
-		this->shape = (size_t*)malloc(sizeof(size_t) * in_dim);
-		// copy shape array to memory
-		memcpy(shape, in_shape, in_dim * sizeof(size_t));
-
-		this->dim = in_dim;
-		this->size = total_el;
-		this->mem_block = tensor_mem;
-
-
+	this->self_init(in_shape, in_dim);
 
 }
+
+void Tensor::self_init(size_t* in_shape, size_t in_dim) {
+
+	// total number of elements given by a cumulative product of shape array over each dim
+	size_t total_el = cumprod(in_shape, in_dim);
+
+	// contiguous block of memory reserved for tensor values
+	float* tensor_mem = (float*)malloc(sizeof(float) * total_el);
+
+	// allocate memory for dimension array
+	this->shape = (size_t*)malloc(sizeof(size_t) * in_dim);
+	// copy shape array to memory
+	memcpy(shape, in_shape, in_dim * sizeof(size_t));
+
+	this->dim = in_dim;
+	this->size = total_el;
+	this->mem_block = tensor_mem;
+}
+
+
+Tensor::Tensor() {}
 
 Tensor::~Tensor() {}
 
@@ -114,6 +119,8 @@ Tensor Tensor::operator^(Tensor b) {
 
 
 	size_t shape[2] = {a_num_rows, b_num_cols};
+	
+	cout << shape[0] << shape[1] << endl;
 
 	Tensor c  = *(new Tensor(shape, this->get_dim()));
 
@@ -124,7 +131,7 @@ Tensor Tensor::operator^(Tensor b) {
 				total += this->mem_block[i*a_num_cols + k] * b[j + k*b_num_cols];
 			}
 
-			c[i*a_num_rows + j] = total;
+			c[i*b_num_cols + j] = total;
 		}
 	}
 
@@ -137,7 +144,6 @@ Tensor Tensor::operator^(Tensor b) {
 void Tensor::dump() {
 	float* buff = mem_block;
 	size_t num_dim = dim;
-
 
 	std::cout << std::fixed;
 	 std::cout << std::setprecision(4);
@@ -166,6 +172,21 @@ void Tensor::fill(float value) {
 	for(int i = 0; i < size; i++) mem_block[i] = value;
 
 }
+
+void Tensor::xavier_init() {
+	size_t in = this->shape[dim - 1];
+	size_t out = this->shape[dim - 2];
+		
+	std::random_device rand_dev;
+	std::mt19937 generate(rand_dev());
+	std::normal_distribution<> gaussian_distr(0, 2.0/(in + out));
+	
+	for(int i = 0; i < this->size; i++) {
+		mem_block[i] = gaussian_distr(generate);
+
+	}
+
+} 
 
 void Tensor::tsqrt() {
 	for(int i = 0; i < size; i++) mem_block[i] = sqrt(mem_block[i]);
@@ -209,24 +230,24 @@ void Tensor::create_prod_arr(size_t* shape_arr, size_t arr_size, int* output_arr
 
 
 // testing
-
+/*
 int main() {
 	
-	size_t shape[2] = {4,4};
+	size_t shape[2] = {8,4};
 	
 	Tensor a(shape, 2);		
-	Tensor b(shape, 2);
+	a.fill(2.5);	
 
-	size_t test_shape[4] = {2,2,2,2};
-	Tensor test(test_shape, 4);
+
+	size_t test_shape[2] = {4, 8};
+	Tensor test(test_shape, 2);
 	test.fill(2.5);
-	test.dump();
 
-	for(int i = 0; i < 16; i++) {a[i] = (float)i; b[i] = (float)i;}
+//	for(int i = 0; i < 16; i++) {a[i] = (float)i; b[i] = (float)i;}
 
-	Tensor c = a ^ b;
-	c.dump();	
-	c = c ^ a;		
+	Tensor c = a ^ test;
+	c.dump();
+*c = c ^ a;		
 	c = c * -1.43;
 	c = c ^ b;
 	c = a + c;
@@ -234,8 +255,8 @@ int main() {
 	c.dump();
 	c.fill(2.0);
 	
-	c.dump();
+//	c.dump();
 	return 0;
 
 }
-
+*/

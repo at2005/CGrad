@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <random>
 using namespace std;
 
 
@@ -9,9 +10,12 @@ using namespace std;
 class Tensor {
 	public:
 		Tensor(size_t* in_shape, size_t in_dim);
+		Tensor();
 
 		~Tensor() ;
 		
+		void self_init(size_t* in_shape, size_t in_dim);
+
 		float* get_mem();
 
 		size_t* get_shape();
@@ -39,7 +43,9 @@ class Tensor {
 		void dump();
 		
 		void fill(float value) ;
-	
+		
+		void xavier_init();
+
 		void tsqrt();	
 
 		void texp();
