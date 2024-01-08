@@ -116,8 +116,7 @@ Tensor Tensor::operator^(Tensor b) {
 	size_t a_num_cols = a_shape[this->get_dim() - 1];
 	size_t b_num_rows = b_shape[b.get_dim() - 2];
 	size_t b_num_cols = b_shape[b.get_dim() - 1];
-
-
+	
 	size_t shape[2] = {a_num_rows, b_num_cols};
 
 	Tensor c  = *(new Tensor(shape, this->get_dim()));
@@ -138,6 +137,13 @@ Tensor Tensor::operator^(Tensor b) {
 }
 
 
+void Tensor::pretty_shape() {
+	std::cout << "(";
+	for(int i = 0; i < dim; i++) std::cout << shape[i] << ",";
+	std::cout << ")\n";
+
+
+}
 
 void Tensor::dump() {
 	float* buff = mem_block;
@@ -150,7 +156,6 @@ void Tensor::dump() {
 	create_prod_arr(shape, num_dim, prod_arr, num_dim-1);
 
 	int total_elements = prod_arr[0];
-
 
 	for(int j = 0; j < total_elements; j++) {
 		std::cout << buff[j] << " ";
@@ -205,6 +210,16 @@ void Tensor::tanh() {
 	for(int i = 0; i < size; i++) mem_block[i] = tanh_scalar(mem_block[i]);
 }
 
+void Tensor::softmax() {
+	float running_total = 0;
+	for(int i = 0; i < size; i++) {
+		mem_block[i] = exp(mem_block[i]);
+		running_total += mem_block[i];
+	}
+
+	for(int i = 0; i < size; i++) mem_block[i] /= running_total;
+
+}
 
 // cumulative product function
 size_t Tensor::cumprod(size_t* arr, size_t len) {
@@ -229,39 +244,3 @@ void Tensor::create_prod_arr(size_t* shape_arr, size_t arr_size, int* output_arr
 }
 
 
-
-
-
-
-
-// testing
-/*
-int main() {
-	
-	size_t shape[2] = {8,4};
-	
-	Tensor a(shape, 2);		
-	a.fill(2.5);	
-
-
-	size_t test_shape[2] = {4, 8};
-	Tensor test(test_shape, 2);
-	test.fill(2.5);
-
-//	for(int i = 0; i < 16; i++) {a[i] = (float)i; b[i] = (float)i;}
-
-	Tensor c = a ^ test;
-	c.dump();
-*c = c ^ a;		
-	c = c * -1.43;
-	c = c ^ b;
-	c = a + c;
-	c = c * -1.5;
-	c.dump();
-	c.fill(2.0);
-	
-//	c.dump();
-	return 0;
-
-}
-*/

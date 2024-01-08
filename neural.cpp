@@ -22,7 +22,7 @@ class MLP {
 MLP::MLP(size_t in, size_t out) {
 	n_in = in;
 	n_out = out;
-	size_t sizes[2] = {in, out};
+	size_t sizes[2] = {out, in};
 	weight.self_init(sizes, 2);
 	weight.xavier_init();
 
@@ -49,11 +49,16 @@ Tensor MLP::backward(Tensor x) {
 }
 
 int main() {
-	size_t shape[2] = {64, 1};
+	size_t shape[2] = {784, 1};
 	Tensor input(shape, 2);
 	input.fill(1);
-	MLP layer1(32, 64);
+	MLP layer1(784, 1000);
+	MLP layer2(1000, 1000);
+	MLP final_layer(1000, 10);
 	Tensor res = layer1.forward(input);	
+	res = layer2.forward(res);
+	res = final_layer.forward(res);
+	res.softmax();
 	res.dump();
 	return 0;
 

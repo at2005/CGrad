@@ -39,7 +39,8 @@ class Tensor {
 		
 		// matmul operation
 		Tensor operator^(Tensor b);
-		
+	
+		void pretty_shape();
 		void dump();
 		
 		void fill(float value) ;
@@ -52,6 +53,7 @@ class Tensor {
 
 		void tanh();
 		
+		void softmax();
 
 	private:
 		float* mem_block;
