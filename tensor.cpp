@@ -1,12 +1,12 @@
 
 #include "tensor.h"
 
-Tensor::Tensor(size_t* in_shape, size_t in_dim) {
-	this->self_init(in_shape, in_dim);
+Tensor::Tensor(size_t* in_shape, size_t in_dim, bool has_grad) {
+	this->self_init(in_shape, in_dim, has_grad);
 
 }
 
-void Tensor::self_init(size_t* in_shape, size_t in_dim) {
+void Tensor::self_init(size_t* in_shape, size_t in_dim, bool has_grad) {
 
 	// total number of elements given by a cumulative product of shape array over each dim
 	size_t total_el = cumprod(in_shape, in_dim);
@@ -22,17 +22,30 @@ void Tensor::self_init(size_t* in_shape, size_t in_dim) {
 	this->dim = in_dim;
 	this->size = total_el;
 	this->mem_block = tensor_mem;
+	
+		
+	if(has_grad) {
+		this->grad = new Tensor();
+		this->grad->self_init(this->shape, dim, false);
+			
+	}
+
+
 }
 
 
 Tensor::Tensor() {}
 
-Tensor::~Tensor() {}
+Tensor::~Tensor() {
+//	free(mem_block);
+//	free(shape);
+
+}
 
 
 float* Tensor::get_mem() {
-		return mem_block;
-	}
+	return mem_block;
+}
 
 size_t* Tensor::get_shape() {
 	return shape;
@@ -46,6 +59,11 @@ size_t Tensor::get_dim() {
 size_t Tensor::get_size() {
 	return size;
 }
+
+Tensor* Tensor::get_grad() {
+	return this->grad;	
+}
+
 
 float& Tensor::operator[](size_t i) {
 	return mem_block[i];
@@ -120,7 +138,7 @@ Tensor Tensor::operator^(Tensor b) {
 	size_t shape[2] = {a_num_rows, b_num_cols};
 
 	Tensor c  = *(new Tensor(shape, this->get_dim()));
-
+	// inefficient matmul
 	for(int i = 0; i < a_num_rows; i++) {
 		for(int j = 0; j < b_num_cols; j++) {
 			float total = 0.0;

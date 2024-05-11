@@ -9,12 +9,12 @@ using namespace std;
 
 class Tensor {
 	public:
-		Tensor(size_t* in_shape, size_t in_dim);
+		Tensor(size_t* in_shape, size_t in_dim, bool has_grad=true);
 		Tensor();
 
 		~Tensor() ;
 		
-		void self_init(size_t* in_shape, size_t in_dim);
+		void self_init(size_t* in_shape, size_t in_dim, bool has_grad=true);
 
 		float* get_mem();
 
@@ -43,6 +43,8 @@ class Tensor {
 		void pretty_shape();
 		void dump();
 		
+		Tensor* get_grad();
+
 		void fill(float value) ;
 		
 		void xavier_init();
@@ -54,16 +56,22 @@ class Tensor {
 		void tanh();
 		
 		void softmax();
+				
+		
 
 	private:
 		float* mem_block;
 		size_t* shape;
 		size_t dim;
 		size_t size;
-
+		
+		Tensor* grad;
+		
 		size_t cumprod(size_t* arr, size_t len);
 		
 		void create_prod_arr(size_t* shape_arr, size_t arr_size, int* output_arr, size_t curr_index);
+		
+
 
 };
 
