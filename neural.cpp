@@ -1,5 +1,7 @@
 
 #include "tensor.h"
+#include "grad.h"
+
 
 class MLP {
 	public:
@@ -28,9 +30,7 @@ MLP::MLP(size_t in, size_t out) {
 }
 
 
-MLP::~MLP() {
-
-}
+MLP::~MLP() {}
 
 
 Tensor MLP::forward(Tensor x) {
@@ -71,7 +71,7 @@ class Loss {
 };
 
 int main() {
-	Loss loss;
+	/*Loss loss;
 	size_t shape[2] = {784, 1};
 	Tensor input(shape, 2, false);
 	input.fill(1);
@@ -83,8 +83,23 @@ int main() {
 	res = final_layer.forward(res);
 	res.softmax();
 	cout << loss.cross_entropy(res) << endl;
+	*/
 //	cout << res.get_grad()->get_shape()[0] << endl;
-	res.dump();
+	//res.dump();
+	
+	size_t shape1[2] = {4,1};
+	size_t shape2[2] = {3,4};
+	Tensor a(shape1, 2, true);
+	a.fill(1);
+	Tensor W(shape2, 2, true); 
+	W.fill(2);
+	cout << W.get_grad() << endl;
+	Tensor out = W ^ a;
+
+	size_t shape3[2] = {3,1};
+	Tensor ograd(shape3, 2, false);
+	ograd.fill(2);
+	
 	return 0;
 
 

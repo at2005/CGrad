@@ -284,6 +284,7 @@ void Tensor::inplace_transpose() {
 
 Tensor* Tensor::make_copy() {
 	Tensor* cpy_tensor = new Tensor(this->shape, this->dim, this-calc_grad);
-	memcpy(cpy_tensor->get_mem(), this->mem_block, this->size*sizeof(float));
+	memcpy(cpy_tensor->get_mem(), this->mem_block, this->size);
+	cpy_tensor.dump();
 	return cpy_tensor;
 }

@@ -1,17 +1,20 @@
 
+#ifndef TENSOR_H
+#define TENSOR_H
+
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <random>
 using namespace std;
 
+class AutoDiffFunc;
 
 
 class Tensor {
 	public:
 		Tensor(size_t* in_shape, size_t in_dim, bool has_grad=true);
 		Tensor();
-
 		~Tensor() ;
 		
 		void self_init(size_t* in_shape, size_t in_dim, bool has_grad=true);
@@ -44,8 +47,9 @@ class Tensor {
 		void dump();
 		
 		Tensor* get_grad();
+		void populate_grad(Tensor* grad_value);
 
-		void fill(float value) ;
+		void fill(float value);
 		
 		void xavier_init();
 
@@ -56,19 +60,23 @@ class Tensor {
 		void tanh();
 		
 		void softmax();
-				
 		
+		void inplace_transpose();
+		
+		Tensor* make_copy();
+
+		AutoDiffFunc* backward;
+			
 
 	private:
 		float* mem_block;
 		size_t* shape;
 		size_t dim;
 		size_t size;
-		
+		vector<Tensor*> children;	
 		Tensor* grad;
-		
+		bool calc_grad;		
 		size_t cumprod(size_t* arr, size_t len);
-		
 		void create_prod_arr(size_t* shape_arr, size_t arr_size, int* output_arr, size_t curr_index);
 		
 
@@ -76,6 +84,6 @@ class Tensor {
 };
 
 
-
+#endif
 
 
