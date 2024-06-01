@@ -4,7 +4,7 @@
 
 #include "tensor.h"
 
-typedef enum {ADD, SUB, MMUL, SIG} diff_op_t;
+typedef enum {ADD, SUB, MMUL, TANH, SOFTMAX} diff_op_t;
 
 class AutoDiffFunc {
 	public:
@@ -17,7 +17,7 @@ class AutoDiffFunc {
 
 		}
 
-		vector<Tensor> compute_grads(Tensor* output_grad) {
+		vector<Tensor> compute_grads(Tensor output_grad) {
 			switch(op) {
 				case MMUL:
 					// inputs must be in order W, x
@@ -28,24 +28,44 @@ class AutoDiffFunc {
 					Tensor* dx = weights.make_copy();
 					dx->inplace_transpose();
 					
-					Tensor* acc_grad_W = (*output_grad ^ *dW).make_copy();
-					Tensor* acc_grad_x = (*dx ^ *output_grad).make_copy();
+					Tensor* acc_grad_W = (output_grad ^ *dW).make_copy();
+					Tensor* acc_grad_x = (*dx ^ output_grad).make_copy();
 					
-					acc_grad_x->dump();
-					acc_grad_W->dump();
-					//delete dx;
-					//delete dW;
-
-
-					vector<Tensor> grads;
 					grads.push_back(*acc_grad_W);
 					grads.push_back(*acc_grad_x);
-					return grads;
+					break;
 
-			}	
+				case TANH:
+					Tensor tanh_grad(input_ctx[0]);
+					tanh_grad.fill(1);
+					tanh_grad = tanh_grad - (input_ctx[0] * input_ctx[0]);
+					grads.push_back(tanh_grad * output_grad);
+					break;
+
+				case SOFTMAX:
+					Tensor s = input_ctx[0];
+					size_t n = s.shape[0];
+					size_t shape_grad_mat[2] = {n,n};
+					Tensor softmax_grad_matrix(shape_grad_mat, 2, false);
+					for(int i = 0; i < n; i++) {
+						for(int j = 0; j < n; j++) {
+							if(i == j) softmax_grad_matrix[i*n + j] = (1-s[i]) * s[i];
+							else softmax_grad_matrix[i*n + j] = -s[i] * s[j];
+						}
+					}
+
+					grads.push_back(softmax_grad_matrix ^ output_grad);
+					break;
+
+			}
+			
+			
+			return grads;
+
 		}
 
 
+	vector<Tensor> grads;
 	diff_op_t op;
 	vector<Tensor> input_ctx;
 

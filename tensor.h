@@ -14,6 +14,7 @@ class AutoDiffFunc;
 class Tensor {
 	public:
 		Tensor(size_t* in_shape, size_t in_dim, bool has_grad=true);
+		Tensor(Tensor& t);
 		Tensor();
 		~Tensor() ;
 		
@@ -47,19 +48,19 @@ class Tensor {
 		void dump();
 		
 		Tensor* get_grad();
-		void populate_grad(Tensor* grad_value);
+		void populate_grad(Tensor grad_value);
 
 		void fill(float value);
 		
 		void xavier_init();
 
-		void tsqrt();	
+		Tensor tsqrt();	
 
-		void texp();
+		Tensor texp();
 
-		void tanh();
+		Tensor tanh();
 		
-		void softmax();
+		Tensor softmax();
 		
 		void inplace_transpose();
 		

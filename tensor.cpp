@@ -44,6 +44,11 @@ Tensor::~Tensor() {
 }
 
 
+// copy constructor
+Tensor(Tensor& t) {
+	self_init(t.shape, t.dim, t.calc_grad);
+}
+
 float* Tensor::get_mem() {
 	return mem_block;
 }
@@ -65,8 +70,8 @@ Tensor* Tensor::get_grad() {
 	return this->grad;	
 }
 
-void Tensor::populate_grad(Tensor* grad_value) {
-	this->grad = grad_value;
+void Tensor::populate_grad(Tensor grad_value) {
+	*(this->grad) = grad_value;
 }
 
 float& Tensor::operator[](size_t i) {
@@ -218,13 +223,17 @@ void Tensor::xavier_init() {
 
 } 
 
-void Tensor::tsqrt() {
-	for(int i = 0; i < size; i++) mem_block[i] = sqrt(mem_block[i]);
+Tensor Tensor::tsqrt() {
+	Tensor new_tensor(*this);
+	for(int i = 0; i < size; i++) new_tensor.mem_block[i] = sqrt(this->mem_block[i]);
+	return new_tensor;
 
 }
 
-void Tensor::texp() {
-	for(int i = 0; i < size; i++) mem_block[i] = exp(mem_block[i]);
+Tensor Tensor::texp() {
+	Tensor new_tensor(*this);
+	for(int i = 0; i < size; i++) new_tensor.mem_block[i] = exp(this->mem_block[i]);
+	return new_tensor;
 
 }
 
@@ -233,18 +242,23 @@ float tanh_scalar(float z) {
 
 }
 
-void Tensor::tanh() {
-	for(int i = 0; i < size; i++) mem_block[i] = tanh_scalar(mem_block[i]);
+Tensor Tensor::tanh() {
+	Tensor new_tensor(*this);
+	for(int i = 0; i < size; i++) new_tensor.mem_block[i] = tanh_scalar(this->mem_block[i]);
+	return new_tensor;
 }
 
-void Tensor::softmax() {
+Tensor Tensor::softmax() {
+	Tensor new_tensor(*this);
+	
 	float running_total = 0;
 	for(int i = 0; i < size; i++) {
-		mem_block[i] = exp(mem_block[i]);
-		running_total += mem_block[i];
+		new_tensor.mem_block[i] = exp(this->mem_block[i]);
+		running_total += new_tensor.mem_block[i];
 	}
 
-	for(int i = 0; i < size; i++) mem_block[i] /= running_total;
+	for(int i = 0; i < size; i++) new_tensor.mem_block[i] /= running_total;
+	return new_tensor;
 
 }
 
