@@ -24,12 +24,14 @@ void Tensor::self_init(size_t* in_shape, size_t in_dim, bool has_grad) {
 	this->size = total_el;
 	this->mem_block = tensor_mem;
 	this->calc_grad = has_grad;
-		
+
 	if(has_grad) {
-		this->grad = new Tensor();
+		this->grad = new Tensor(this->shape, this->dim, false);
 		this->grad->self_init(this->shape, dim, false);
-			
+		this->grad->fill(0);
+
 	}
+	
 
 
 }
@@ -44,10 +46,14 @@ Tensor::~Tensor() {
 }
 
 
+/*
 // copy constructor
-Tensor(Tensor& t) {
+Tensor::Tensor(const Tensor& t) {
+	//t.dump();
 	self_init(t.shape, t.dim, t.calc_grad);
+
 }
+*/
 
 float* Tensor::get_mem() {
 	return mem_block;
@@ -67,17 +73,31 @@ size_t Tensor::get_size() {
 }
 
 Tensor* Tensor::get_grad() {
-	return this->grad;	
+	return (this->grad);	
 }
 
-void Tensor::populate_grad(Tensor grad_value) {
-	*(this->grad) = grad_value;
+void Tensor::accumulate_grad(Tensor grad_value) {
+	if(!this->grad) {
+		this->grad = new Tensor(this->shape, this->dim, false);
+		this->grad->fill(0);
+	}
+	*(this->grad) = *(this->grad) + grad_value;
 }
 
 float& Tensor::operator[](size_t i) {
 	return mem_block[i];
 
 }
+
+/*
+Tensor Tensor::operator=(Tensor b) {
+	this->shape = b.get_shape();
+	this->dim = b.get_dim();
+	this->mem_block = b.get_mem();
+	this->grad = b.get_grad();
+	return *this;
+}
+*/
 
 
 Tensor Tensor::operator+(Tensor b) {
@@ -86,6 +106,11 @@ Tensor Tensor::operator+(Tensor b) {
 		c[i] = this->mem_block[i] + b[i];
 	
 	}
+	
+	vector<Tensor> inputs;
+	inputs.push_back(*this);
+	inputs.push_back(b);
+	c.backward = new AutoDiffFunc(ADD, inputs);
 		
 	return c;
 
@@ -245,7 +270,11 @@ float tanh_scalar(float z) {
 Tensor Tensor::tanh() {
 	Tensor new_tensor(*this);
 	for(int i = 0; i < size; i++) new_tensor.mem_block[i] = tanh_scalar(this->mem_block[i]);
+	vector<Tensor> ctx;
+	ctx.push_back(new_tensor);
+	new_tensor.backward = new AutoDiffFunc(TANH, ctx);
 	return new_tensor;
+
 }
 
 Tensor Tensor::softmax() {
@@ -258,6 +287,10 @@ Tensor Tensor::softmax() {
 	}
 
 	for(int i = 0; i < size; i++) new_tensor.mem_block[i] /= running_total;
+
+	vector<Tensor> ctx;
+	ctx.push_back(new_tensor);
+	new_tensor.backward = new AutoDiffFunc(SOFTMAX, ctx);
 	return new_tensor;
 
 }

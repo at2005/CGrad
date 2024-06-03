@@ -14,7 +14,7 @@ class AutoDiffFunc;
 class Tensor {
 	public:
 		Tensor(size_t* in_shape, size_t in_dim, bool has_grad=true);
-		Tensor(Tensor& t);
+//		Tensor(const Tensor& t);
 		Tensor();
 		~Tensor() ;
 		
@@ -31,6 +31,8 @@ class Tensor {
 		float& operator[](size_t i);
 
 		Tensor operator+(Tensor b); 
+
+//		Tensor operator=(Tensor b); 
 		
 		Tensor operator-(Tensor b);
 
@@ -48,7 +50,10 @@ class Tensor {
 		void dump();
 		
 		Tensor* get_grad();
-		void populate_grad(Tensor grad_value);
+		void accumulate_grad(Tensor grad_value);
+		bool check_if_grad() {
+			return calc_grad;	
+		}
 
 		void fill(float value);
 		
