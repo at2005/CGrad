@@ -18,24 +18,25 @@ class AutoDiffFunc {
 
 	vector<Tensor> compute_grads(Tensor output_grad) {
 		// inputs must be in order W, x
-		grads.clear();
 		if(op == MMUL) {
+		grads.clear();
 			Tensor weights = input_ctx[0];
 			Tensor x = input_ctx[1];
-			Tensor* dW = x.make_copy();
-			dW->inplace_transpose(); 
-			Tensor* dx = weights.make_copy();
-			dx->inplace_transpose();
+			Tensor dW = x.make_copy();
+			dW.inplace_transpose(); 
+			Tensor dx = weights.make_copy();
+			dx.inplace_transpose();
 			
-			Tensor* acc_grad_W = (output_grad ^ *dW).make_copy();
-			Tensor* acc_grad_x = (*dx ^ output_grad).make_copy();
+			Tensor acc_grad_W = output_grad ^ dW;
+			Tensor acc_grad_x = (dx ^ output_grad);
 			
-			grads.push_back(*acc_grad_W);
-			grads.push_back(*acc_grad_x);
+			grads.push_back(acc_grad_W);
+			grads.push_back(acc_grad_x);
 			return grads;
 		}
 
 		if(op == TANH) {
+		grads.clear();
 			Tensor ctx_val = input_ctx[0];
 			Tensor tanh_grad(ctx_val.get_shape(), ctx_val.get_dim(), false);
 			tanh_grad.fill(1);
@@ -46,6 +47,7 @@ class AutoDiffFunc {
 
 		
 		if(op == SOFTMAX) {
+		grads.clear();
 			Tensor s = input_ctx[0];
 			size_t n = s.get_shape()[0];
 			size_t shape_grad_mat[2] = {n,n};
@@ -65,11 +67,14 @@ class AutoDiffFunc {
 		}
 		
 		if(op == ADD) {
+		grads.clear();
 			// addition distributes gradients
 			grads.push_back(output_grad);
 			grads.push_back(output_grad);
 			return grads;
 		}
+
+		return grads;	
 		
 
 	}

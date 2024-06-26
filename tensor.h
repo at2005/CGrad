@@ -70,7 +70,7 @@ class Tensor {
 		
 		void inplace_transpose();
 		
-		Tensor* make_copy();
+		Tensor make_copy();
 
 		AutoDiffFunc* backward;
 			

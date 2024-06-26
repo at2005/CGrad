@@ -41,8 +41,8 @@ MLP::~MLP() {}
 Tensor MLP::forward(Tensor x) {
 	// should probably add context-storing functionality here
 	Tensor c = weight ^ x;
-	c = c + bias;
-	c = c.tanh();
+//	c = c + bias;
+//	c = c.tanh();
 	return c;
 
 }
@@ -93,9 +93,11 @@ class Network {
 	
 	void propagate(Tensor t, Tensor dL) {
 		if(!t.backward) return;
-		vector<Tensor> parents = t.backward->input_ctx; 
+		vector<Tensor> parents = t.backward->input_ctx;
 		vector<Tensor> parent_grads = t.backward->compute_grads(dL);
+
 		for(int i = 0; i < parents.size(); i++) {
+			if(!parents[i].check_if_grad()) continue;
 			parents[i].accumulate_grad(parent_grads[i]);
 			propagate(parents[i], parent_grads[i]);
 		}
@@ -139,29 +141,43 @@ void SGD(Network net, vector< pair<Tensor, Tensor> > batches) {
 
 int main() {
 	size_t shape[2] = {5, 1};
-	Tensor input(shape, 2, NO_GRAD);
+	Tensor input(shape, 2, false);
 	input.fill(1);
 
-	Tensor target(shape, 2, NO_GRAD);
+	Tensor target(shape, 2, false);
 	target.fill(0);
 	target[0] = 1;
-	
-/*	Tensor input2(shape, 2, NO_GRAD);
-	input.fill(1);
 
-	Tensor target2(shape, 2, NO_GRAD);
-	target.fill(0);
-	target[1] = 1;
-*/	
-	Network net;
+
+	Tensor input2(shape, 2, false);
+	input2.fill(1);
+
+	Tensor target2(shape, 2, false);
+	target2.fill(0);
+	target2[1] = 1;
+
+	/*
 	Tensor res = net.forward(input);
-	float val = cross_entropy(res, target);
-	cout << val << endl;
+	
 	backward(res, target);
 
-//	SGD(net, batches);	
-//	r.get_grad()->dump();
+//	SGD(net, batches);
+*/	
+
+	MLP layer1(5,5);	
+	MLP layer2(5,5);
+	MLP layer3(5,5);
+	MLP layer4(5,5);
+	MLP layer5(5,5);
+	MLP layer6(5,5);
+	MLP layer7(5,5);
+	MLP layer8(5,5);
+	MLP layer9(5,5);
 	
+
+	Tensor res = layer9.forward(layer8.forward(layer7.forward(layer6.forward(layer5.forward(layer4.forward(layer3.forward(layer2.forward(layer1.forward(input)))))))));
+	backward(res, target);
+
 	return 0;
 
 

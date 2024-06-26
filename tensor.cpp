@@ -105,7 +105,7 @@ Tensor Tensor::operator=(Tensor b) {
 
 
 Tensor Tensor::operator+(Tensor b) {
-	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	Tensor c = Tensor(this->get_shape(), this->get_dim());
 	for(int i = 0; i < this->get_size();i++) {
 		c[i] = this->mem_block[i] + b[i];
 	
@@ -121,7 +121,7 @@ Tensor Tensor::operator+(Tensor b) {
 }
 
 Tensor Tensor::operator-(Tensor b) {
-	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	Tensor c = Tensor(this->get_shape(), this->get_dim());
 	for(int i = 0; i < this->get_size();i++) {
 		c[i] = this->mem_block[i] - b[i];
 
@@ -132,7 +132,7 @@ Tensor Tensor::operator-(Tensor b) {
 }
 
 Tensor Tensor::operator*(float scalar) {
-	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	Tensor c = Tensor(this->get_shape(), this->get_dim());
 	for(int i = 0; i < this->get_size();i++) {
 		c[i] = scalar * this->mem_block[i];
 
@@ -144,7 +144,7 @@ Tensor Tensor::operator*(float scalar) {
 
 
 Tensor Tensor::operator*(Tensor b) {
-	Tensor c = *(new Tensor(this->get_shape(), this->get_dim()));
+	Tensor c = Tensor(this->get_shape(), this->get_dim());
 	
 	for(int i = 0; i < this->get_size();i++) {
 		c[i] = b.mem_block[i] * this->mem_block[i];
@@ -175,7 +175,7 @@ Tensor Tensor::operator^(Tensor b) {
 	
 	size_t shape[2] = {a_num_rows, b_num_cols};
 
-	Tensor c  = *(new Tensor(shape, this->get_dim()));
+	Tensor c  = Tensor(shape, this->get_dim());
 	// inefficient matmul
 	for(int i = 0; i < a_num_rows; i++) {
 		for(int j = 0; j < b_num_cols; j++) {
@@ -333,8 +333,8 @@ void Tensor::inplace_transpose() {
 
 
 
-Tensor* Tensor::make_copy() {
-	Tensor* cpy_tensor = new Tensor(this->shape, this->dim, this-calc_grad);
-	memcpy(cpy_tensor->get_mem(), this->mem_block, this->size*sizeof(float));
+Tensor Tensor::make_copy() {
+	Tensor cpy_tensor = Tensor(this->shape, this->dim, this-calc_grad);
+	memcpy(cpy_tensor.get_mem(), this->mem_block, this->size*sizeof(float));
 	return cpy_tensor;
 }
