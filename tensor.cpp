@@ -55,6 +55,10 @@ Tensor::Tensor(const Tensor& t) {
 }
 */
 
+void Tensor::muleq(float c) {
+	for(int i = 0; i < size; i++) mem_block[i] *= c;
+}
+
 float* Tensor::get_mem() {
 	return mem_block;
 }

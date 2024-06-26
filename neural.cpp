@@ -47,12 +47,6 @@ Tensor MLP::forward(Tensor x) {
 
 }
 
-Tensor MLP::backward(Tensor x) {
-	// for now backward passes are not defined
-	return x;
-
-}
-
 class Network {
 	public:
 	Network() : layer1(5,6), layer2(6,6), layer3(6,5) {}
@@ -71,82 +65,79 @@ class Network {
 
 };
 
-class Loss {
-	public:
-		Loss() {}
-		// takes as input a (C, 1) tensor
-		float cross_entropy(Tensor x_, Tensor target_) {
-			x = x_;	
-			target = target_;
-			size_t classes = x.get_shape()[0];
-			float sum = 0;
-			for(int i = 0; i < classes; i++) {
-				sum += target[i] * -log2(x[i]); 
-			}
-			
-			loss_val = sum;
-			return sum;
-
+	// takes as input a (C, 1) tensor
+	float cross_entropy(Tensor x, Tensor target) {
+		size_t classes = x.get_shape()[0];
+		float sum = 0;
+		for(int i = 0; i < classes; i++) {
+			sum += target[i] * -log2(x[i]); 
 		}
 		
-		Tensor cross_entropy_grad() {
-			int idx;
-			size_t* shape = x.get_shape(); 
-			for(int i = 0; i < shape[1]; i++) {
-				if(target[i] == 1) idx = i;
-			}
+		return sum;
 
-
-			Tensor grad(shape, 2, NO_GRAD);					
-			grad.fill(0);
-			grad[idx] = -1/(x[idx]);
-			return grad;
-
-		} 
-		
-		void propagate(Tensor t, Tensor dL) {
-			if(!t.backward) return;
-			vector<Tensor> parents = t.backward->input_ctx; 
-			vector<Tensor> parent_grads = t.backward->compute_grads(dL);
-			for(int i = 0; i < parents.size(); i++) {
-				parents[i].accumulate_grad(parent_grads[i]);
-				propagate(parents[i], parent_grads[i]);
-			}
-
+	}
+	
+	Tensor cross_entropy_grad(Tensor x, Tensor target) {
+		int idx;
+		size_t* shape = x.get_shape(); 
+		for(int i = 0; i < shape[1]; i++) {
+			if(target[i] == 1) idx = i;
 		}
 
-		void backward() {
-			// first compute derivative wrt loss
-			Tensor dL = cross_entropy_grad();
-			propagate(x, dL);
+		Tensor grad(shape, 2, NO_GRAD);					
+		grad.fill(0);
+		grad[idx] = -1/(x[idx]);
+		return grad;
+
+	} 
+	
+	void propagate(Tensor t, Tensor dL) {
+		if(!t.backward) return;
+		vector<Tensor> parents = t.backward->input_ctx; 
+		vector<Tensor> parent_grads = t.backward->compute_grads(dL);
+		for(int i = 0; i < parents.size(); i++) {
+			parents[i].accumulate_grad(parent_grads[i]);
+			propagate(parents[i], parent_grads[i]);
 		}
 
-		
-	private:
-		float loss_val;
-		Tensor x;
-		Tensor target;
+	}
+
+	void backward(Tensor x, Tensor target) {
+		// first compute derivative wrt loss
+		Tensor dL = cross_entropy_grad(x, target);
+		propagate(x, dL);
+	}
+
 		
 
-};
+void traverse(Tensor x, float scaling_factor) {
+	if(!x.backward) return;
+	vector<Tensor> parents = x.backward->input_ctx;
+	for(int i = 0; i < parents.size(); i++) {
+		if(parents[i].get_grad()) parents[i].get_grad()->muleq(scaling_factor);
+		traverse(parents[i], scaling_factor);
+	}
+}
+
 
 void SGD(Network net, vector< pair<Tensor, Tensor> > batches) {
 	size_t n = batches.size();
 	for(int i = 0; i < n; i++) {
-		Loss loss;
 		Tensor x = batches[i].first;
 		Tensor target = batches[i].second;
 		Tensor res = net.forward(x);
-		loss.cross_entropy(res, target);	
-		loss.backward();
+		float loss_val = cross_entropy(res, target);	
+		backward(res, target);
 	}
 	
-	// TODO divide grads by n to get mean grad
+//	traverse(res, (1/n));	
+	
 
+
+//	return res;
 }
 
 int main() {
-	Loss loss;
 	size_t shape[2] = {5, 1};
 	Tensor input(shape, 2, NO_GRAD);
 	input.fill(1);
@@ -155,12 +146,21 @@ int main() {
 	target.fill(0);
 	target[0] = 1;
 	
+/*	Tensor input2(shape, 2, NO_GRAD);
+	input.fill(1);
+
+	Tensor target2(shape, 2, NO_GRAD);
+	target.fill(0);
+	target[1] = 1;
+*/	
 	Network net;
 	Tensor res = net.forward(input);
-	
-	cout << loss.cross_entropy(res, target) << endl;
-		
-	loss.backward();
+	float val = cross_entropy(res, target);
+	cout << val << endl;
+	backward(res, target);
+
+//	SGD(net, batches);	
+//	r.get_grad()->dump();
 	
 	return 0;
 

@@ -40,6 +40,7 @@ class Tensor {
 		
 		// element-wise hadamard product
 		Tensor operator*(Tensor b);
+		void muleq(float c);
 
 		//Tensor operator/(float scalar);
 		
