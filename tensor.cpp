@@ -282,6 +282,18 @@ Tensor Tensor::tanh() {
 
 }
 
+Tensor Tensor::sin() {
+	Tensor new_tensor(*this);
+	for(int i = 0; i < size; i++) new_tensor.mem_block[i] = sin(this->mem_block[i])
+	if(calc_grad) {
+		vector<Tensor> ctx;
+		ctx.push_back(new_tensor);
+//		new_tensor.backward = new AutoDiffFunc(SIN, ctx);
+	}
+
+	return new_tensor;
+}
+
 Tensor Tensor::softmax() {
 	Tensor new_tensor(*this);
 	
