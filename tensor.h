@@ -68,6 +68,8 @@ class Tensor {
 		
 		Tensor softmax();
 		
+		Tensor sin();
+
 		void inplace_transpose();
 		
 		Tensor make_copy();

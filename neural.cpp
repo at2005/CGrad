@@ -41,8 +41,8 @@ MLP::~MLP() {}
 Tensor MLP::forward(Tensor x) {
 	// should probably add context-storing functionality here
 	Tensor c = weight ^ x;
-//	c = c + bias;
-//	c = c.tanh();
+	c = c + bias;
+	c = c.tanh();
 	return c;
 
 }
@@ -124,19 +124,16 @@ void traverse(Tensor x, float scaling_factor) {
 
 void SGD(Network net, vector< pair<Tensor, Tensor> > batches) {
 	size_t n = batches.size();
+	Tensor res;
 	for(int i = 0; i < n; i++) {
 		Tensor x = batches[i].first;
 		Tensor target = batches[i].second;
-		Tensor res = net.forward(x);
+		res = net.forward(x);
 		float loss_val = cross_entropy(res, target);	
 		backward(res, target);
 	}
-	
-//	traverse(res, (1/n));	
-	
 
-
-//	return res;
+	traverse(res, (1.0/(float)n));	
 }
 
 int main() {
@@ -155,28 +152,23 @@ int main() {
 	Tensor target2(shape, 2, false);
 	target2.fill(0);
 	target2[1] = 1;
+	
+	vector<pair<Tensor, Tensor> > batches;
+	batches.push_back(make_pair(input, target));
+	batches.push_back(make_pair(input2, target2));
+	
+	Network net;
+	SGD(net, batches);
+
+	net.layer1.weight.get_grad()->dump();
 
 	/*
 	Tensor res = net.forward(input);
 	
 	backward(res, target);
 
-//	SGD(net, batches);
 */	
 
-	MLP layer1(5,5);	
-	MLP layer2(5,5);
-	MLP layer3(5,5);
-	MLP layer4(5,5);
-	MLP layer5(5,5);
-	MLP layer6(5,5);
-	MLP layer7(5,5);
-	MLP layer8(5,5);
-	MLP layer9(5,5);
-	
-
-	Tensor res = layer9.forward(layer8.forward(layer7.forward(layer6.forward(layer5.forward(layer4.forward(layer3.forward(layer2.forward(layer1.forward(input)))))))));
-	backward(res, target);
 
 	return 0;
 

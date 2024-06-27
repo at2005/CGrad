@@ -24,6 +24,7 @@ void Tensor::self_init(size_t* in_shape, size_t in_dim, bool has_grad) {
 	this->size = total_el;
 	this->mem_block = tensor_mem;
 	this->calc_grad = has_grad;
+	this->backward = nullptr;
 
 	if(has_grad) {
 		this->grad = new Tensor(this->shape, this->dim, false);
